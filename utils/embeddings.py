@@ -29,10 +29,22 @@ def embed_text(text: str) -> list[float]:
     return model.embed_query(text)
 
 
-def embed_texts(texts: list[str]) -> list[list[float]]:
-    """Embed a batch of text strings."""
+def embed_texts(texts: list[str], max_chars: int = 1800) -> list[list[float]]:
+    """
+    Embed a batch of text strings.
+
+    Truncates each input to max_chars (default 1800 ≈ 450 tokens) so that
+    long table representations / image captions never exceed the embedding
+    model's context window (mxbai-embed-large defaults to 512 tokens).
+    """
     if not texts:
         return []
     model = get_embedding_model()
-    logger.debug("Embedding batch of %d texts", len(texts))
-    return model.embed_documents(texts)
+
+    safe_texts = [t if len(t) <= max_chars else t[:max_chars] for t in texts]
+    truncated = sum(1 for a, b in zip(texts, safe_texts) if a != b)
+    logger.debug(
+        "Embedding batch of %d texts (truncated %d to %d chars)",
+        len(texts), truncated, max_chars,
+    )
+    return model.embed_documents(safe_texts)

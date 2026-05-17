@@ -194,27 +194,37 @@ class VectorStore:
                     logger.info("add_chunks: all %d chunks already indexed", skipped)
                 return
 
-            # Embed in batches to keep Ollama happy
+            # Embed + index + persist in batches so a mid-flight failure
+            # doesn't lose all earlier progress.
             batch = 64
-            all_vecs: list[list[float]] = []
+            embedded_count = 0
             for i in range(0, len(new_texts), batch):
-                all_vecs.extend(embed_texts(new_texts[i:i + batch]))
+                batch_texts = new_texts[i:i + batch]
+                batch_records = new_records[i:i + batch]
+                try:
+                    vecs = embed_texts(batch_texts)
+                except Exception as e:
+                    logger.error(
+                        "Embedding failed at batch starting %d (size %d): %s — skipping batch",
+                        i, len(batch_texts), e,
+                    )
+                    continue
 
-            arr = np.asarray(all_vecs, dtype=np.float32)
-            faiss.normalize_L2(arr)  # cosine similarity via inner product
+                arr = np.asarray(vecs, dtype=np.float32)
+                faiss.normalize_L2(arr)
+                self._index.add(arr)
 
-            self._index.add(arr)
+                start = len(self._docs)
+                for offset, record in enumerate(batch_records):
+                    self._docs.append(record)
+                    self._id_to_pos[record["id"]] = start + offset
 
-            start = len(self._docs)
-            for offset, record in enumerate(new_records):
-                self._docs.append(record)
-                self._id_to_pos[record["id"]] = start + offset
-
-            self._persist()
+                embedded_count += len(batch_records)
+                self._persist()  # checkpoint after every batch
 
         logger.info(
-            "Indexed %d new chunks (skipped %d already-present) — total=%d",
-            len(new_records), skipped, len(self._docs),
+            "Indexed %d new chunks (skipped %d already-present, %d batch failures) — total=%d",
+            embedded_count, skipped, len(new_records) - embedded_count, len(self._docs),
         )
 
     # ── Read ─────────────────────────────────────────────────────────────
