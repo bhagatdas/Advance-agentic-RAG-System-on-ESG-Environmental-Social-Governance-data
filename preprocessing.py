@@ -104,7 +104,19 @@ class ExtractedImage:
 # 1. PDF text extraction
 # ════════════════════════════════════════════════════════════════════════════
 
-def extract_text_from_pdf(pdf_path: str) -> list[PageText]:
+def extract_text_from_pdf(
+    pdf_path: str,
+    ocr_fallback: bool = True,
+    ocr_min_chars: int = 100,
+    ocr_dpi: int = 200,
+) -> list[PageText]:
+    """
+    Extract clean text per page. When PyMuPDF returns < ocr_min_chars for a
+    page (typical for scanned / image-only pages), render the page and run
+    EasyOCR as a fallback; the OCR text is used iff it found more content.
+    OCR text is saved in the same `text` field as PyMuPDF text — downstream
+    chunking / indexing treats it identically.
+    """
     path = Path(pdf_path)
     if not path.exists():
         logger.error("PDF not found: %s", pdf_path)
@@ -112,13 +124,28 @@ def extract_text_from_pdf(pdf_path: str) -> list[PageText]:
 
     doc_name = path.stem
     pages: list[PageText] = []
+    ocr_pages_used = 0
 
     try:
         doc = fitz.open(str(path))
-        logger.info("Processing PDF — file=%s, pages=%d", doc_name, len(doc))
+        logger.info(
+            "Processing PDF — file=%s, pages=%d, ocr_fallback=%s",
+            doc_name, len(doc), ocr_fallback,
+        )
         for page_num in range(len(doc)):
             page = doc[page_num]
             cleaned = _clean_text(page.get_text("text"))
+
+            if ocr_fallback and len(cleaned) < ocr_min_chars:
+                ocr_text = _ocr_page(page, dpi=ocr_dpi)
+                if len(ocr_text) > len(cleaned):
+                    logger.info(
+                        "Page %d OCR fallback — pymupdf=%d chars, ocr=%d chars",
+                        page_num + 1, len(cleaned), len(ocr_text),
+                    )
+                    cleaned = _clean_text(ocr_text)
+                    ocr_pages_used += 1
+
             if cleaned.strip():
                 pages.append(PageText(
                     page_number=page_num + 1,
@@ -128,13 +155,26 @@ def extract_text_from_pdf(pdf_path: str) -> list[PageText]:
         doc.close()
         total_chars = sum(p.char_count for p in pages)
         logger.info(
-            "Text extraction complete — doc=%s, pages=%d, chars=%d",
-            doc_name, len(pages), total_chars,
+            "Text extraction complete — doc=%s, pages=%d, chars=%d, ocr_pages=%d",
+            doc_name, len(pages), total_chars, ocr_pages_used,
         )
     except Exception as e:
         logger.error("Failed to extract text from %s: %s", pdf_path, e)
 
     return pages
+
+
+def _ocr_page(page, dpi: int = 200) -> str:
+    """Render a PDF page to a PNG and OCR it via EasyOCR. Returns merged text."""
+    try:
+        reader = _get_ocr_reader()
+        pix = page.get_pixmap(dpi=dpi)
+        png_bytes = pix.tobytes("png")
+        results = reader.readtext(png_bytes, detail=0)
+        return "\n".join(results).strip()
+    except Exception as e:
+        logger.warning("Page OCR failed: %s", e)
+        return ""
 
 
 def _clean_text(text: str) -> str:
@@ -681,6 +721,7 @@ def preprocess_all_pdfs(
     use_vision: bool = True,
     use_contextual: bool = True,
     use_raptor: bool = True,
+    ocr_fallback: bool = True,
     clear_existing: bool = False,
 ) -> dict:
     """
@@ -691,6 +732,9 @@ def preprocess_all_pdfs(
         use_vision: Caption images with the vision LLM
         use_contextual: Apply Anthropic-style contextual prefixes
         use_raptor: Build the RAPTOR hierarchical summary tree
+        ocr_fallback: When PyMuPDF returns very little text for a page, render
+            the page and OCR it via EasyOCR. The OCR output replaces the page
+            text and flows through the normal chunking + indexing path.
         clear_existing: Wipe FAISS + SQLite + BM25 before re-ingesting
     """
     pdf_dir = Path(pdf_dir or settings.pdf_dir)
@@ -736,6 +780,7 @@ def preprocess_all_pdfs(
             str(pdf_path),
             use_vision=use_vision,
             use_contextual=use_contextual,
+            ocr_fallback=ocr_fallback,
         )
         stats["pdfs_processed"] += 1
         stats["total_pages"] += doc_stats.get("pages", 0)
@@ -778,13 +823,14 @@ def _process_single_pdf(
     pdf_path: str,
     use_vision: bool = True,
     use_contextual: bool = True,
+    ocr_fallback: bool = True,
 ) -> dict:
     doc_name = Path(pdf_path).stem
     stats = {"pages": 0, "text_chunks": 0, "tables": 0, "images": 0, "raw_chunks": []}
 
-    # 1. Text
-    logger.info("[1/5] Extracting text...")
-    pages = extract_text_from_pdf(pdf_path)
+    # 1. Text (with OCR fallback for image-only pages)
+    logger.info("[1/5] Extracting text (OCR fallback=%s)...", ocr_fallback)
+    pages = extract_text_from_pdf(pdf_path, ocr_fallback=ocr_fallback)
     stats["pages"] = len(pages)
 
     # 2. Chunk
@@ -869,6 +915,8 @@ def _cli():
     parser.add_argument("--no-vision", action="store_true", help="Skip LLaVA image captions")
     parser.add_argument("--no-contextual", action="store_true", help="Skip Anthropic contextualization")
     parser.add_argument("--no-raptor", action="store_true", help="Skip RAPTOR tree build")
+    parser.add_argument("--no-ocr-fallback", action="store_true",
+                        help="Disable EasyOCR fallback for pages where PyMuPDF returns little text")
     parser.add_argument("--clear", action="store_true", help="Wipe FAISS + tables + BM25 first")
     args = parser.parse_args()
 
@@ -879,6 +927,7 @@ def _cli():
         use_vision=not args.no_vision,
         use_contextual=not args.no_contextual,
         use_raptor=not args.no_raptor,
+        ocr_fallback=not args.no_ocr_fallback,
         clear_existing=args.clear,
     )
 
