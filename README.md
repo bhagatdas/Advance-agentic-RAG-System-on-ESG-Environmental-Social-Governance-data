@@ -124,22 +124,21 @@ Full design, agent-by-agent breakdown, and end-to-end query traces: **[PROJECT_D
 
 ---
 
-## Tech Stack
+## Tech stack
 
-| Layer | Technology |
+| Layer | Tech |
 |---|---|
-| Orchestration  | LangGraph 0.4+, LangChain 0.3+ |
-| LLM backend    | Ollama (DeepSeek light/heavy, LLaVA vision, Nomic embeddings) |
-| Vector DB      | ChromaDB (cosine, HNSW) |
-| Sparse search  | rank-bm25 (BM25Okapi) |
-| Reranker       | sentence-transformers cross-encoder |
-| Tables         | SQLite + pandas |
-| PDF            | PyMuPDF + pymupdf4llm |
-| OCR            | EasyOCR (pip-installable, no system deps) |
-| API            | FastAPI + Uvicorn |
-| Tracing        | LangSmith |
-| Evaluation     | RAGAS + custom semantic similarity |
-| Frontend       | Vanilla HTML / CSS / JS |
+| Orchestration | LangGraph 0.4+, LangChain 0.3+ |
+| LLM | Ollama (DeepSeek light/heavy, LLaVA vision, Nomic embed) |
+| Vector DB | ChromaDB (cosine, HNSW) |
+| Sparse retrieval | rank_bm25 |
+| Reranker | sentence-transformers cross-encoder |
+| Tables | SQLite + pandas |
+| PDF | PyMuPDF + pymupdf4llm |
+| OCR | EasyOCR (pip-installable) |
+| API | FastAPI + Uvicorn |
+| Tracing | LangSmith |
+| Eval | RAGAS + custom semantic similarity |
 
 ---
 
