@@ -25,9 +25,9 @@ class Settings(BaseSettings):
 
     # ── Ollama ──
     ollama_base_url: str = Field(default="http://localhost:11434")
-    ollama_model_light: str = Field(default="gpt-oss:12b-cloud")
-    ollama_model_heavy: str = Field(default="gpt-oss:12b-cloud")
-    ollama_model_vision: str = Field(default="gpt-oss:12b-cloud")
+    ollama_model_light: str = Field(default="gpt-oss:120b-cloud")
+    ollama_model_heavy: str = Field(default="gpt-oss:120b-cloud")
+    ollama_model_vision: str = Field(default="gpt-oss:120b-cloud")
     ollama_model_embed: str = Field(default="mxbai-embed-large")
 
     # ── Storage Paths ──

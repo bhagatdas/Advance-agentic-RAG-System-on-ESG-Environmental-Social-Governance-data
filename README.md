@@ -51,9 +51,9 @@ pip install -r requirements.txt
 # 2. Configure environment
 # Create a .env file in the project root. Minimal keys:
 #   OLLAMA_BASE_URL=http://localhost:11434
-#   OLLAMA_MODEL_LIGHT=gpt-oss:12b-cloud
-#   OLLAMA_MODEL_HEAVY=gpt-oss:12b-cloud
-#   OLLAMA_MODEL_VISION=gpt-oss:12b-cloud   # or llava if you need image captions
+#   OLLAMA_MODEL_LIGHT=gpt-oss:120b-cloud
+#   OLLAMA_MODEL_HEAVY=gpt-oss:120b-cloud
+#   OLLAMA_MODEL_VISION=gpt-oss:120b-cloud   # or llava if you need image captions
 #   OLLAMA_MODEL_EMBED=mxbai-embed-large
 #   FAISS_PERSIST_DIR=./data/faiss
 #   LANGCHAIN_TRACING_V2=true
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 
 # 3. Start Ollama (separate terminal) and pull the models referenced in .env
 ollama serve
-ollama pull gpt-oss:12b-cloud
+ollama pull gpt-oss:120b-cloud
 ollama pull mxbai-embed-large
 # (optional) ollama pull llava   # only if you want image captioning
 
@@ -142,7 +142,7 @@ For deeper dives, read the agents and routers directly: [agents/](agents/), [gra
 | Layer | Tech |
 |---|---|
 | Orchestration | LangGraph 0.4+, LangChain 0.3+ |
-| LLM | Ollama (gpt-oss:12b-cloud for light/heavy/vision, mxbai-embed-large for embeddings) |
+| LLM | Ollama (gpt-oss:120b-cloud for light/heavy/vision, mxbai-embed-large for embeddings) |
 | Vector DB | FAISS (IndexFlatIP over L2-normalized vectors = cosine similarity) |
 | Sparse retrieval | rank_bm25 |
 | Reranker | sentence-transformers cross-encoder |
