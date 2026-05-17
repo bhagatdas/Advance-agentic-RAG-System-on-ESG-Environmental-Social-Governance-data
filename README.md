@@ -5,12 +5,12 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.4+-1c3d5a.svg)](https://langchain-ai.github.io/langgraph/)
 [![LangChain](https://img.shields.io/badge/LangChain-0.3+-1c3d5a.svg)](https://www.langchain.com/)
-[![ChromaDB](https://img.shields.io/badge/ChromaDB-0.5+-4b3f72.svg)](https://www.trychroma.com/)
+[![FAISS](https://img.shields.io/badge/FAISS-1.8+-4b3f72.svg)](https://github.com/facebookresearch/faiss)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-000000.svg)](https://ollama.com/)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey.svg)](#license)
 
-Built on **LangGraph**, **Ollama**, and **ChromaDB**. Ingests PDFs (text + tables + images), builds a hierarchical retrieval index, and answers questions through a **7-agent workflow** with corrective feedback loops (CRAG).
+Built on **LangGraph**, **Ollama**, and **FAISS**. Ingests PDFs (text + tables + images), builds a hierarchical retrieval index, and answers questions through a **7-agent workflow** with corrective feedback loops (CRAG).
 
 ---
 
@@ -29,7 +29,7 @@ The planner decides **per query**:
 
 - **Multi-modal ingestion** — text + tables (extracted into SQLite) + images (OCR via EasyOCR + vision-LLM captions)
 - **Parent-child chunking** with **Anthropic-style contextual retrieval** (chunks prepended with 2-3 sentence context)
-- **Hybrid retrieval** — BM25 (sparse) + ChromaDB (dense) merged with Reciprocal Rank Fusion
+- **Hybrid retrieval** — BM25 (sparse) + FAISS (dense, cosine via normalized inner product) merged with Reciprocal Rank Fusion
 - **Cross-encoder reranking** (`ms-marco-MiniLM-L-6-v2`) for precision filtering
 - **RAPTOR tree** — recursive K-Means clustering + LLM summarization, 3 levels deep, for global queries
 - **Map-Reduce** strategy for exhaustive aggregation (`"list ALL initiatives..."`)
@@ -51,21 +51,23 @@ pip install -r requirements.txt
 # 2. Configure environment
 # Create a .env file in the project root. Minimal keys:
 #   OLLAMA_BASE_URL=http://localhost:11434
-#   OLLAMA_MODEL_LIGHT=<your light model>
-#   OLLAMA_MODEL_HEAVY=<your heavy model>
-#   OLLAMA_MODEL_VISION=llava
-#   OLLAMA_MODEL_EMBED=nomic-embed-text
+#   OLLAMA_MODEL_LIGHT=gpt-oss:12b-cloud
+#   OLLAMA_MODEL_HEAVY=gpt-oss:12b-cloud
+#   OLLAMA_MODEL_VISION=gpt-oss:12b-cloud   # or llava if you need image captions
+#   OLLAMA_MODEL_EMBED=mxbai-embed-large
+#   FAISS_PERSIST_DIR=./data/faiss
 #   LANGCHAIN_TRACING_V2=true
 #   LANGCHAIN_API_KEY=<your LangSmith key>
 # See config/settings.py for the full list of supported keys + defaults.
 
 # 3. Start Ollama (separate terminal) and pull the models referenced in .env
 ollama serve
-ollama pull nomic-embed-text
-# ... plus your light/heavy/vision models
+ollama pull gpt-oss:12b-cloud
+ollama pull mxbai-embed-large
+# (optional) ollama pull llava   # only if you want image captioning
 
 # 4. Drop ESG PDFs into data/pdfs/ then ingest
-python main.py ingest
+python preprocessing.py --clear        # or: python main.py ingest --clear
 
 # 5a. CLI chat
 python main.py chat
@@ -80,11 +82,15 @@ uvicorn app:app --reload --port 8000
 ## CLI
 
 ```bash
-python main.py ingest                                 # Preprocess all PDFs
-python main.py ingest --clear --no-vision             # Re-ingest, skip vision captions
-python main.py query "What are Scope 1 emissions?"    # Single query
-python main.py chat                                   # Interactive REPL
-python main.py schema                                 # Print schema catalog
+# Ingestion (offline) — choose either entry point; both call the same pipeline
+python preprocessing.py --clear                       # standalone preprocessor
+python preprocessing.py --clear --no-vision           # skip image captions
+python main.py ingest                                 # alternative: via main.py
+
+# Querying
+python main.py query "What are Scope 1 emissions?"    # one-shot
+python main.py chat                                   # interactive REPL
+python main.py schema                                 # print schema catalog
 ```
 
 ---
@@ -114,7 +120,7 @@ curl -X POST http://localhost:8000/query \
 
 ```
 PDF -> text + tables + images
-     -> parent/child chunks -> contextualize -> embed -> ChromaDB
+     -> parent/child chunks -> contextualize -> embed -> FAISS
      -> RAPTOR hierarchical summaries
      -> SQLite table store + schema catalog
 
@@ -136,8 +142,8 @@ For deeper dives, read the agents and routers directly: [agents/](agents/), [gra
 | Layer | Tech |
 |---|---|
 | Orchestration | LangGraph 0.4+, LangChain 0.3+ |
-| LLM | Ollama (DeepSeek light/heavy, LLaVA vision, Nomic embed) |
-| Vector DB | ChromaDB (cosine, HNSW) |
+| LLM | Ollama (gpt-oss:12b-cloud for light/heavy/vision, mxbai-embed-large for embeddings) |
+| Vector DB | FAISS (IndexFlatIP over L2-normalized vectors = cosine similarity) |
 | Sparse retrieval | rank_bm25 |
 | Reranker | sentence-transformers cross-encoder |
 | Tables | SQLite + pandas |
@@ -153,23 +159,17 @@ For deeper dives, read the agents and routers directly: [agents/](agents/), [gra
 
 ```
 agentic_rag/
-├── main.py                       # CLI entry
+├── main.py                       # CLI entry (ingest / query / chat / schema)
 ├── app.py                        # FastAPI REST API
+├── preprocessing.py              # single-file PDF pipeline — text/tables/images,
+│                                 # chunking, contextualization, RAPTOR, schema catalog
 ├── config/settings.py            # Pydantic Settings
 ├── utils/                        # LLM router, embeddings, cache, logging
-├── ingestion/                    # PDF -> text/tables/images -> chunks
-│   ├── pdf_processor.py
-│   ├── table_extractor.py        # tables -> SQLite
-│   ├── image_extractor.py        # OCR + vision captions
-│   ├── contextualizer.py         # Anthropic contextual retrieval
-│   └── preprocessor.py           # master pipeline
 ├── retrieval/
-│   ├── chunking.py               # parent-child chunks
-│   ├── vector_store.py           # ChromaDB
+│   ├── vector_store.py           # FAISS (IndexFlatIP, cosine via normalization)
 │   ├── bm25_retriever.py
 │   ├── hybrid.py                 # RRF fusion
-│   ├── reranker.py               # cross-encoder
-│   └── raptor.py                 # hierarchical summaries
+│   └── reranker.py               # cross-encoder
 ├── storage/
 │   ├── sql_store.py              # SQLite (SELECT-only at runtime)
 │   └── schema_manager.py
@@ -199,7 +199,7 @@ All settings via `.env` (full list with defaults in [config/settings.py](config/
 | Group       | Keys |
 |---|---|
 | Ollama      | `OLLAMA_BASE_URL`, `OLLAMA_MODEL_LIGHT`, `OLLAMA_MODEL_HEAVY`, `OLLAMA_MODEL_VISION`, `OLLAMA_MODEL_EMBED` |
-| Storage     | `CHROMA_PERSIST_DIR`, `SQLITE_TABLE_DB`, `CHECKPOINT_DB`, `DATA_DIR`, `PDF_DIR`, `IMAGE_DIR` |
+| Storage     | `FAISS_PERSIST_DIR`, `SQLITE_TABLE_DB`, `CHECKPOINT_DB`, `DATA_DIR`, `PDF_DIR`, `IMAGE_DIR` |
 | Chunking    | `CHUNK_SIZE_CHILD=400`, `CHUNK_SIZE_PARENT=1600`, `CHUNK_OVERLAP=50` |
 | Retrieval   | `RETRIEVAL_TOP_K=20`, `RERANK_TOP_K=5` |
 | RAPTOR      | `RAPTOR_CLUSTER_SIZE=10`, `RAPTOR_MAX_LEVELS=3` |
