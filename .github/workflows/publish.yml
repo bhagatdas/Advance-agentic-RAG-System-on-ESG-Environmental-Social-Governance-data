@@ -1,0 +1,40 @@
+name: Publish to PyPI
+
+# Triggers on tags like v0.1.0, v0.2.0-rc1, etc.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write   # required for PyPI trusted publishing (OIDC)
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/pdfagent-rag/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Publish to PyPI via OIDC
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No password / api token needed when using PyPI trusted publishing.
+        # Configure once at https://pypi.org/manage/account/publishing/
+        # (see PUBLISHING.md in the repo root).

@@ -70,7 +70,10 @@ Between retrieval/table_agent and reasoning, an **entity-metric extractor** pull
 Three steps from `pip install` to chatting with a PDF — no clone, no preprocessing CLI required.
 
 ```bash
-# 1. Install (from GitHub — no PyPI publish yet)
+# 1. Install — PyPI (once a release is tagged; see ./PUBLISHING.md)
+pip install pdfagent-rag
+
+# …or install the latest commit directly from GitHub
 pip install git+https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF.git
 
 # 2. Install + start Ollama (https://ollama.com/download), then pull models
@@ -80,6 +83,8 @@ ollama signin                       # only if using cloud models like gpt-oss:12
 # 3. Launch the UI (creates a data/ folder in the current working directory)
 pdfagent
 ```
+
+> The PyPI distribution name is **`pdfagent-rag`** (the bare `pdfagent` name is owned by an unrelated project). The console command is still `pdfagent`.
 
 Open **http://localhost:8000** → click **Upload PDF** → drop a file → wait for the live progress to finish → ask questions. No CLI ingestion step needed.
 
