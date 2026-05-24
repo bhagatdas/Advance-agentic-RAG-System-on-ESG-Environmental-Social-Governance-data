@@ -71,7 +71,7 @@ Three steps from `pip install` to chatting with a PDF — no clone, no preproces
 
 ```bash
 # 1. Install — PyPI (once a release is tagged; see ./PUBLISHING.md)
-pip install pdfagent-rag
+pip install agentic-rag-pdf
 
 # …or install the latest commit directly from GitHub
 pip install git+https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF.git
@@ -84,7 +84,7 @@ ollama signin                       # only if using cloud models like gpt-oss:12
 pdfagent
 ```
 
-> The PyPI distribution name is **`pdfagent-rag`** (the bare `pdfagent` name is owned by an unrelated project). The console command is still `pdfagent`.
+> The PyPI distribution name is **`agentic-rag-pdf`** (the bare `pdfagent` name is owned by an unrelated project). The console command shipped by the wheel is still `pdfagent`.
 
 Open **http://localhost:8000** → click **Upload PDF** → drop a file → wait for the live progress to finish → ask questions. No CLI ingestion step needed.
 

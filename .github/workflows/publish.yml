@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/pdfagent-rag/
+      url: https://pypi.org/project/agentic-rag-pdf/
 
     steps:
       - uses: actions/checkout@v4

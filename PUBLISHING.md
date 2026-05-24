@@ -1,6 +1,6 @@
-# Publishing `pdfagent-rag` to PyPI
+# Publishing `agentic-rag-pdf` to PyPI
 
-This repo publishes to PyPI as **`pdfagent-rag`** (the bare `pdfagent` name on
+This repo publishes to PyPI as **`agentic-rag-pdf`** (the bare `pdfagent` name on
 PyPI is owned by an unrelated project). The console command shipped by the
 package is still `pdfagent`.
 
@@ -19,7 +19,7 @@ PyPI via OpenID Connect, so you never paste an API token into a secret.
 2. **Reserve the project name** by uploading the first release manually (see
    the [Manual fallback](#manual-fallback) below). PyPI only lets you configure
    trusted publishing on projects that already exist.
-3. **Add the GitHub publisher** at https://pypi.org/manage/project/pdfagent-rag/settings/publishing/ →
+3. **Add the GitHub publisher** at https://pypi.org/manage/project/agentic-rag-pdf/settings/publishing/ →
    *Add a new pending publisher*:
    - **Owner:** `bhagatdas`
    - **Repository:** `PdfAgent-Agentic-RAG-over-any-PDF`
@@ -46,7 +46,7 @@ git push origin v0.1.0
 #    https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF/actions
 ```
 
-When the run finishes, `pip install pdfagent-rag==0.1.0` works for everyone.
+When the run finishes, `pip install agentic-rag-pdf==0.1.0` works for everyone.
 
 ---
 
@@ -75,7 +75,7 @@ For a dry run, upload to TestPyPI first:
 
 ```bash
 python -m twine upload --repository testpypi dist/*
-pip install --index-url https://test.pypi.org/simple/ pdfagent-rag
+pip install --index-url https://test.pypi.org/simple/ agentic-rag-pdf
 ```
 
 ---
