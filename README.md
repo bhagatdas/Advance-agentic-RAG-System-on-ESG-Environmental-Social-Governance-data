@@ -18,7 +18,7 @@ Built on **LangGraph**, **Ollama**, and **FAISS**. Ingests PDFs (text + tables +
 
 ## Browser UI
 
-![PdfAgent UI](docs/ui-screenshot.png)
+![PdfAgent UI](https://raw.githubusercontent.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF/master/docs/ui-screenshot.png)
 
 One-click PDF upload (replaces the indexed corpus with live progress), streamed agent-by-agent answers with quality pills (Confidence / Faithfulness / Citation coverage / Attribution), and an inspectable Response Details panel with retrieved chunks, generated SQL, token usage per agent, and execution trace. See [Using PdfAgent](#using-pdfagent) below.
 
@@ -26,7 +26,7 @@ One-click PDF upload (replaces the indexed corpus with live progress), streamed 
 
 ## Workflow
 
-![LangGraph Workflow](workflow.png)
+![LangGraph Workflow](https://raw.githubusercontent.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF/master/workflow.png)
 
 The planner decides **per query**:
 1. **In-scope check** — greetings, smalltalk, or off-topic queries short-circuit straight to `END` with a polite redirect.

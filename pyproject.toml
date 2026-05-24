@@ -4,20 +4,66 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-rag-pdf"
-version = "0.1.1"
-description = "Agentic RAG over any PDF — grounded, cited answers via LangGraph + Ollama + FAISS"
+version = "0.1.2"
+description = "Agentic RAG over any PDF — grounded, cited answers from research reports, ESG/sustainability disclosures, contracts, manuals, and filings. Multi-agent LangGraph workflow with hybrid retrieval, RAPTOR summaries, NL→SQL over extracted tables, CRAG corrective loops, and a defense-in-depth hallucination stack."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Bhagat Kumar Das", email = "bhagatkumar75@gmail.com" }]
 maintainers = [{ name = "Bhagat Kumar Das", email = "bhagatkumar75@gmail.com" }]
 license = { text = "Proprietary" }
-keywords = ["rag", "agentic-rag", "langgraph", "ollama", "faiss", "pdf", "llm"]
+keywords = [
+    "rag",
+    "agentic-rag",
+    "retrieval-augmented-generation",
+    "langgraph",
+    "langchain",
+    "ollama",
+    "faiss",
+    "bm25",
+    "hybrid-search",
+    "raptor",
+    "crag",
+    "rerank",
+    "cross-encoder",
+    "pdf",
+    "pdf-extraction",
+    "table-extraction",
+    "ocr",
+    "llm",
+    "ai-agent",
+    "multi-agent",
+    "chatbot",
+    "question-answering",
+    "vector-search",
+    "embedding",
+    "fastapi",
+    "sustainability",
+    "esg",
+    "hallucination-detection",
+    "citation",
+    "faithfulness",
+]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Framework :: FastAPI",
+    "Environment :: Web Environment",
+    "Environment :: Console",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 dynamic = ["dependencies"]
 
@@ -25,6 +71,9 @@ dynamic = ["dependencies"]
 Homepage = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF"
 Repository = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF"
 Issues = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF/issues"
+Documentation = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF#readme"
+"Release Notes" = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF/releases"
+"Source Code" = "https://github.com/bhagatdas/PdfAgent-Agentic-RAG-over-any-PDF"
 
 [project.scripts]
 pdfagent = "pdfagent_cli:main"
