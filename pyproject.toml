@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-rag-pdf"
-version = "0.1.4"
+version = "0.1.5"
 description = "Agentic RAG over any PDF — grounded, cited answers from research reports, ESG/sustainability disclosures, contracts, manuals, and filings. Multi-agent LangGraph workflow with hybrid retrieval, RAPTOR summaries, NL→SQL over extracted tables, CRAG corrective loops, and a defense-in-depth hallucination stack."
 readme = "README.md"
 requires-python = ">=3.11"

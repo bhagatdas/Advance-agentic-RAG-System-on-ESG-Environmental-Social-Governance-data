@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     # ── Retrieval ──
     retrieval_top_k: int = Field(default=20)
     rerank_top_k: int = Field(default=5)
+    rerank_enabled: bool = Field(default=False)
 
     # ── RAPTOR ──
     raptor_cluster_size: int = Field(default=10)
@@ -54,6 +55,26 @@ class Settings(BaseSettings):
     # ── Memory ──
     short_term_max_messages: int = Field(default=20)
     long_term_max_items: int = Field(default=200)
+
+    # ── Context window budgeting ──
+    max_context_tokens: int = Field(default=131072)
+    output_tokens_reserved: int = Field(default=4096)
+    prompt_overhead_tokens: int = Field(default=3000)
+    ctx_share_text: float = Field(default=0.75)
+    ctx_share_table: float = Field(default=0.12)
+    ctx_share_map_reduce: float = Field(default=0.10)
+    ctx_share_memory: float = Field(default=0.03)
+    chars_per_token: float = Field(default=4.0)
+
+    # ── Hallucination defense ──
+    citation_coverage_threshold: float = Field(default=0.5)
+
+    # ── Attribution verifier ──
+    attribution_enabled: bool = Field(default=True)
+    attribution_max_facts: int = Field(default=40)
+    attribution_entity_fuzzy_ratio: float = Field(default=0.85)
+    attribution_value_tolerance: float = Field(default=0.005)
+    attribution_proximity_tokens: int = Field(default=15)
 
     # ── LangSmith ──
     langchain_tracing_v2: str = Field(default="false")
