@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-rag-pdf"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agentic RAG over any PDF — grounded, cited answers via LangGraph + Ollama + FAISS"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Bhagat Das", email = "bhagatkumar75@gmail.com" }]
+authors = [{ name = "Bhagat Kumar Das", email = "bhagatkumar75@gmail.com" }]
+maintainers = [{ name = "Bhagat Kumar Das", email = "bhagatkumar75@gmail.com" }]
 license = { text = "Proprietary" }
 keywords = ["rag", "agentic-rag", "langgraph", "ollama", "faiss", "pdf", "llm"]
 classifiers = [
