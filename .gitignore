@@ -71,17 +71,27 @@ dmypy.json
 # Project data — large/binary/generated, don't push
 # ───────────────────────────────────────────────────────────
 data/chroma/
+data/faiss/
 data/images/
 data/logs/
-data/tables.db
-data/checkpoints.db
+data/tables/
+data/checkpoints/
+data/traces/
 data/response_log.jsonl
 data/schema_catalog.json
 data/pdfs/*.pdf
 data/pdfs/*.PDF
+data/models/
 
 # Keep the placeholder so the directory structure is preserved
 !data/pdfs/README.txt
+
+# ───────────────────────────────────────────────────────────
+# Evaluation — outputs are regenerable, inputs are user-labeled
+# ───────────────────────────────────────────────────────────
+evaluation/*_results.json
+evaluation/results/
+QNA_data/
 
 # ───────────────────────────────────────────────────────────
 # IDE / editor

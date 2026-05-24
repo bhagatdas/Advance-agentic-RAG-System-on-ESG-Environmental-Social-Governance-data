@@ -3,52 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESG Insight Pro — Bhagat Labs</title>
-    <meta name="description" content="AI-powered ESG Report Intelligence by Bhagat Labs">
+    <title>PdfAgent — Agentic RAG for any PDF</title>
+    <meta name="description" content="PdfAgent — one-shot agentic RAG over any PDF with grounded citations.">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='32' y2='32'><stop stop-color='%2310b981'/><stop offset='1' stop-color='%233b82f6'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><g transform='translate(4,4)' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 6V2H8'/><path d='m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z'/><path d='M2 12h2'/><path d='M9 11v2'/><path d='M15 11v2'/><path d='M20 12h2'/></g></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=14">
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar -->
+        <!-- ── Sidebar ── -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
                     <svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="32" height="32" rx="8" fill="url(#brandGrad)"/>
-                        <path d="M8 16C8 11.58 11.58 8 16 8C20.42 8 24 11.58 24 16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M12 20C12 17.79 13.79 16 16 16C18.21 16 20 17.79 20 20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="16" cy="24" r="1.5" fill="white"/>
+                        <g transform="translate(4,4)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 6V2H8"/>
+                            <path d="m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"/>
+                            <path d="M2 12h2"/>
+                            <path d="M9 11v2"/>
+                            <path d="M15 11v2"/>
+                            <path d="M20 12h2"/>
+                        </g>
                         <defs><linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#10b981"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
                     </svg>
                     <div>
-                        <span class="brand-name">ESG Insight Pro</span>
-                        <span class="brand-sub">by Bhagat Labs</span>
+                        <span class="brand-name">PdfAgent</span>
+                        <span class="brand-sub">Agentic RAG over any PDF</span>
                     </div>
                 </div>
             </div>
-            <button class="new-chat-btn" onclick="newChat()">
+
+            <button class="new-chat-btn" onclick="newChat()" title="Start a new conversation">
                 <span>+</span> New Conversation
             </button>
+
+            <button class="upload-pdf-btn" onclick="openUploadModal()" title="Replace the indexed PDF — wipes existing data">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload PDF
+            </button>
+
             <div class="sidebar-section">
                 <span class="section-label">Suggested Queries</span>
-                <button class="suggestion-btn" onclick="fillQuery('What are the main sustainability themes in this report?')">
-                    <span class="suggestion-icon">&#9670;</span> Report Themes Overview
+                <button class="suggestion-btn" onclick="fillQuery('What are the main themes in this document?')">
+                    <span class="suggestion-icon">&#9670;</span> Document Themes
                 </button>
-                <button class="suggestion-btn" onclick="fillQuery('What were the Scope 1 and Scope 2 carbon emissions?')">
-                    <span class="suggestion-icon">&#9670;</span> Emissions Data
+                <button class="suggestion-btn" onclick="fillQuery('Summarize the key findings and conclusions')">
+                    <span class="suggestion-icon">&#9670;</span> Key Findings
                 </button>
-                <button class="suggestion-btn" onclick="fillQuery('List all sustainability initiatives mentioned')">
-                    <span class="suggestion-icon">&#9670;</span> All Initiatives
+                <button class="suggestion-btn" onclick="fillQuery('Extract all numerical data and metrics')">
+                    <span class="suggestion-icon">&#9670;</span> Numbers &amp; Metrics
                 </button>
-                <button class="suggestion-btn" onclick="fillQuery('What are the key ESG risks identified?')">
-                    <span class="suggestion-icon">&#9670;</span> ESG Risk Analysis
+                <button class="suggestion-btn" onclick="fillQuery('What are the main risks discussed?')">
+                    <span class="suggestion-icon">&#9670;</span> Risk Analysis
                 </button>
-                <button class="suggestion-btn" onclick="fillQuery('Compare environmental metrics year over year')">
-                    <span class="suggestion-icon">&#9670;</span> YoY Comparison
+                <button class="suggestion-btn" onclick="fillQuery('Compare data across time periods or sections')">
+                    <span class="suggestion-icon">&#9670;</span> Comparisons
+                </button>
+                <button class="suggestion-btn" onclick="fillQuery('List all entities, people, and organizations mentioned')">
+                    <span class="suggestion-icon">&#9670;</span> Entities &amp; Actors
                 </button>
             </div>
+
             <div class="sidebar-footer">
                 <div class="system-status" id="systemStatus">
                     <span class="status-dot online"></span>
@@ -57,63 +77,109 @@
             </div>
         </aside>
 
-        <!-- Main Chat Area -->
+        <!-- ── Main Chat Area ── -->
         <main class="chat-area">
-            <!-- Chat Header -->
             <header class="chat-header">
                 <div class="chat-title">
-                    <h1>ESG Report Intelligence</h1>
-                    <span class="chat-subtitle">Ask anything about your sustainability reports</span>
+                    <h1 class="chat-heading">Ask anything</h1>
+                    <span class="chat-subtitle">Grounded answers from your PDFs, with source citations.</span>
                 </div>
                 <div class="header-actions">
-                    <button class="icon-btn" onclick="toggleDetails()" title="Toggle details panel">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+                    <button class="icon-btn" onclick="toggleDetails()" title="Toggle response details">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
                     </button>
                 </div>
             </header>
 
-            <!-- Messages Container -->
+            <!-- Messages -->
             <div class="messages-container" id="messagesContainer">
-                <!-- Welcome message -->
                 <div class="welcome-screen" id="welcomeScreen">
                     <div class="welcome-icon">
-                        <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="url(#wGrad)"/><path d="M12 24C12 17.37 17.37 12 24 12C30.63 12 36 17.37 36 24" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M18 30C18 26.69 20.69 24 24 24C27.31 24 30 26.69 30 30" stroke="white" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="36" r="2" fill="white"/><defs><linearGradient id="wGrad" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#10b981"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs></svg>
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <rect width="48" height="48" rx="12" fill="url(#wGrad)"/>
+                            <g transform="translate(6,6)" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 9V3H12"/>
+                                <path d="m12 27-6 6V12a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3Z"/>
+                                <path d="M3 18h3"/>
+                                <path d="M13.5 16.5v3"/>
+                                <path d="M22.5 16.5v3"/>
+                                <path d="M30 18h3"/>
+                            </g>
+                            <defs><linearGradient id="wGrad" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#10b981"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
+                        </svg>
                     </div>
-                    <h2>ESG Insight Pro</h2>
-                    <p>Your AI-powered ESG report analyst. Ask questions about sustainability reports, carbon emissions, ESG metrics, and more.</p>
+                    <h2>What would you like to know from your PDFs?</h2>
+                    <p>Ask anything about your uploaded documents — themes, data points, comparisons, or specific facts. Every answer is grounded with source citations.</p>
+
+                    <div class="welcome-cards">
+                        <button class="welcome-card" onclick="fillQuery('Summarize the key findings and main conclusions of this document')">
+                            <div class="welcome-card-title">Quick summary</div>
+                            <div class="welcome-card-desc">Get the main takeaways from the document</div>
+                        </button>
+                        <button class="welcome-card" onclick="fillQuery('Extract all numerical data, metrics, and figures from this document')">
+                            <div class="welcome-card-title">Pull the numbers</div>
+                            <div class="welcome-card-desc">Surface every metric, percentage, or figure</div>
+                        </button>
+                        <button class="welcome-card" onclick="fillQuery('Compare data across different sections or time periods and explain the changes')">
+                            <div class="welcome-card-title">Compare &amp; contrast</div>
+                            <div class="welcome-card-desc">Multi-hop comparison with explanation</div>
+                        </button>
+                        <button class="welcome-card" onclick="fillQuery('What are the main themes, risks, and opportunities discussed?')">
+                            <div class="welcome-card-title">Themes &amp; risks</div>
+                            <div class="welcome-card-desc">High-level analysis across the whole document</div>
+                        </button>
+                    </div>
+
                     <div class="welcome-note">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                        <span>Answers are sourced exclusively from your uploaded ESG reports. The system will not provide information outside the ingested documents.</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        <span>Answers come exclusively from your uploaded PDFs — every claim is grounded with source citations and verified by a faithfulness checker.</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Input Area -->
+            <!-- Input -->
             <div class="input-area">
                 <div class="input-wrapper">
-                    <textarea id="queryInput" placeholder="Ask about your ESG reports..." rows="1" autofocus></textarea>
-                    <button id="submitBtn" onclick="submitQuery()" title="Send (Ctrl+Enter)">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    <textarea id="queryInput" placeholder="Ask anything about your PDFs..." rows="1" autofocus></textarea>
+                    <button id="submitBtn" onclick="submitQuery()" title="Send (Enter)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                 </div>
-                <p class="input-disclaimer">ESG Insight Pro only answers from uploaded reports. Responses include source citations.</p>
+                <p class="input-disclaimer">
+                    Grounded answers with citations. Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd>+<kbd>Enter</kbd> for a new line.
+                </p>
             </div>
         </main>
 
-        <!-- Details Panel (collapsible) -->
+        <!-- ── Details Panel ── -->
         <aside class="details-panel" id="detailsPanel" style="display:none">
             <div class="details-header">
                 <h3>Response Details</h3>
-                <button class="icon-btn" onclick="toggleDetails()">&#10005;</button>
+                <button class="icon-btn" onclick="toggleDetails()" title="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
             </div>
             <div class="details-content" id="detailsContent">
                 <div class="detail-section" id="detailSources">
-                    <h4>Sources & Citations</h4>
+                    <h4>Sources &amp; Citations</h4>
                     <div id="sourcesList"><p class="empty-state">Submit a query to see sources</p></div>
                 </div>
                 <div class="detail-section" id="detailSQL" style="display:none">
                     <h4>Generated SQL</h4>
                     <pre id="sqlDisplay"></pre>
+                </div>
+                <div class="detail-section">
+                    <h4>Retrieved Chunks</h4>
+                    <div id="retrievedChunksList"><p class="empty-state">Submit a query to see retrieved chunks</p></div>
+                </div>
+                <div class="detail-section">
+                    <h4>Token Usage per Agent</h4>
+                    <div id="tokenBreakdown"><p class="empty-state">No LLM calls yet</p></div>
                 </div>
                 <div class="detail-section">
                     <h4>Execution Trace</h4>
@@ -126,6 +192,55 @@
             </div>
         </aside>
     </div>
-    <script src="/static/app.js"></script>
+
+    <!-- ── Upload PDF modal ── -->
+    <div class="modal-backdrop" id="uploadBackdrop" style="display:none" onclick="onBackdropClick(event, 'upload')">
+        <div class="modal" role="dialog" aria-labelledby="uploadTitle">
+            <div class="modal-header">
+                <h3 id="uploadTitle">Replace indexed PDF</h3>
+                <button class="icon-btn" onclick="closeUploadModal()" title="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="uploadBody">
+                <p class="modal-warn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Uploading replaces the indexed PDF. All FAISS embeddings, BM25, table data, checkpoints, images, traces, and the previous PDF will be deleted. Only the cached reranker model is preserved.
+                </p>
+
+                <label class="file-drop" id="fileDrop">
+                    <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" onchange="onFileChosen(event)">
+                    <div class="file-drop-inner" id="fileDropInner">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span class="file-drop-text">Click to choose a PDF</span>
+                        <span class="file-drop-hint">or drop it here</span>
+                    </div>
+                </label>
+
+                <div class="upload-steps" id="uploadSteps" style="display:none">
+                    <div class="upload-steps-header">
+                        <span class="typing-indicator"><span></span><span></span><span></span></span>
+                        <span id="uploadStepsLabel">Preparing…</span>
+                    </div>
+                    <ul class="step-list" id="uploadStepList"></ul>
+                </div>
+
+                <div class="upload-result" id="uploadResult" style="display:none"></div>
+
+                <div class="ollama-help" id="ollamaHelp" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeUploadModal()" id="uploadCancelBtn">Cancel</button>
+                <button class="btn-primary" id="uploadStartBtn" onclick="startUpload()" disabled>
+                    Wipe &amp; Ingest
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <script src="/static/app.js?v=16"></script>
 </body>
 </html>

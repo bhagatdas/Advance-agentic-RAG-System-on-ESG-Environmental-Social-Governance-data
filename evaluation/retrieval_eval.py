@@ -29,6 +29,8 @@ import math
 import time
 from pathlib import Path
 
+from tqdm import tqdm
+
 from config.settings import settings
 from retrieval.vector_store import vector_store
 from retrieval.hybrid import hybrid_search
@@ -154,10 +156,18 @@ def evaluate_retrieval(
     per_stage_timings: dict[str, list[float]] = {s: [] for s in STAGES}
     failures: list[dict] = []
 
-    for i, item in enumerate(gold, start=1):
+    pbar = tqdm(
+        gold,
+        desc="Retrieval eval",
+        unit="q",
+        dynamic_ncols=True,
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]",
+    )
+    for i, item in enumerate(pbar, start=1):
         query = item["question"]
         relevant = set(item.get("relevant_chunk_ids", []))
         if not relevant:
+            pbar.set_postfix_str(f"qid={item.get('qid','?')[:24]} skipped", refresh=False)
             continue
 
         for stage_name, fn in STAGES.items():
@@ -183,8 +193,8 @@ def evaluate_retrieval(
             })
             per_stage_timings[stage_name].append(elapsed_ms)
 
-        if i % 10 == 0:
-            logger.info("Progress: %d/%d queries scored", i, len(gold))
+        pbar.set_postfix_str(f"qid={item.get('qid','?')[:24]}", refresh=False)
+    pbar.close()
 
     aggregates = {
         stage: _aggregate([q["scores"] for q in per_stage_per_query[stage]])
